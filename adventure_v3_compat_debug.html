@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>冒險 v3-compat-debug（錯誤顯示版）</title>
+<style>
+  html, body { margin:0; padding:0; background:#0e0f14; color:#e6e6ea; font-family: system-ui, -apple-system, sans-serif; }
+  #err { position:fixed; left:0; right:0; bottom:0; background:#2a1326; color:#ffdfe6; border-top:1px solid #5a2748; padding:8px 10px; font-size:12px; line-height:1.45; display:none; white-space:pre-wrap; z-index:9999; }
+</style>
+<script>
+  (function(){
+    function show(msg){
+      var e=document.getElementById('err'); e.style.display='block';
+      e.textContent = msg + "\\nUA: " + navigator.userAgent;
+    }
+    window.onerror=function(message, source, lineno, colno, error){
+      show("Error: " + message + "\\n at " + source + ":" + lineno + ":" + colno);
+      return false;
+    };
+    window.onunhandledrejection=function(ev){ show("UnhandledRejection: " + (ev && ev.reason ? ev.reason : "")); };
+    if(!('CanvasRenderingContext2D' in window)) show("此瀏覽器不支援 Canvas 2D");
+  })();
+</script>
+</head>
+<body>
+<div id="app-root"></div>
+<div id="err"></div>
+
+<script>
+(function(){
+  var _clone = window.structuredClone || function(obj){ return JSON.parse(JSON.stringify(obj)); };
+  var root=document.getElementById('app-root');
+  root.innerHTML='<div><canvas id="game" width="640" height="400" style="background:#11131a;border:1px solid #262837;border-radius:8px;image-rendering:pixelated"></canvas></div>';
+  var canvas=document.getElementById('game'); var ctx=canvas.getContext('2d');
+  var TILE=32, COLS=Math.floor(canvas.width/TILE), ROWS=Math.floor(canvas.height/TILE);
+  function blank(){var m=[];for(var y=0;y<ROWS;y++){var r=[];for(var x=0;x<COLS;x++){r.push((x===0||y===0||x===COLS-1||y===ROWS-1)?1:0);}m.push(r);}return m;}
+  var levels=[(function(){var m=blank();return {name:"L1",map:m,portals:[]};})()];
+  var state={levelIndex:0,levels:_clone(levels),player:{x:2,y:2}};
+  function draw(){ctx.fillStyle="#0e0f14";ctx.fillRect(0,0,canvas.width,canvas.height);for(var y=0;y<ROWS;y++){for(var x=0;x<COLS;x++){ctx.fillStyle=(state.levels[0].map[y][x]===1?"#2b3047":"#1b1f2d");ctx.fillRect(x*TILE,y*TILE,TILE,TILE);}}ctx.fillStyle="#f5a97f";ctx.beginPath();ctx.arc(state.player.x*TILE+TILE/2, state.player.y*TILE+TILE/2, TILE*0.35, 0, Math.PI*2);ctx.fill();}
+  draw();
+})();
+</script>
+
+</body>
+</html>
